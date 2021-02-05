@@ -1,0 +1,139 @@
+---
+title: "Homework #1 -- Pet Names Dataset"
+author: "Musab Isah\n"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+**Student ID:insert ID here**
+
+**Deadline:** 23:59 on Friday, 12 February 2021
+
+
+## Loading Packages
+
+```{r load-packages, message = FALSE}
+
+library(tidyverse)
+library(openintro)
+```
+
+
+##Exercises
+
+1.  According to the data dictionary, how many pets are included in this dataset?
+
+
+```{r}
+
+```
+Write your narrative below:
+
+
+
+2.  Again, according to the data dictionary, how many variables do we have for each pet?
+
+
+```{r}
+
+```
+Write your narrative below:
+
+
+3. What are the three most common pet names in Seattle? To do this you will need to count the frequencies of each pet name and display the results in descending order of frequency so that you can easily see the top three most popular names. Copy the code provided in the homework documentation and paste it here. Write your narrative below.
+
+
+```{r}
+
+```
+Write your narrative below:
+
+
+Use the two chunk of codes below to answer question 4.
+
+Finding the most common pet names for various species. We first `group_by()` the `species`, and then count the number in each group.
+```{r species-names, eval=TRUE}
+seattlepets %>% 
+  group_by(species) %>%
+  count(animal_name, sort = TRUE)
+```
+
+Let us also find the various species of animals using the code below.
+
+```{r species, eval=TRUE}
+seattlepets %>%
+  count(species, sort = TRUE)
+```
+
+To search for the top 5 cat and dog names, we can use the `slice_max()` function.
+
+
+```{r species-names-top5, eval=TRUE}
+seattlepets %>% 
+  group_by(species) %>%
+  count(animal_name, sort = TRUE) %>% 
+  slice_max(n, n = 5)
+```
+
+4. Based on the previous output we can easily identify the most common cat and dog names in Seattle, but the output is sorted by `n` (the frequencies) as opposed to being organized by the `species`. Build on the pipeline to arrange the results so that they're arranged by `species` first, and then `n`. This means you will need to add one more step to the pipeline, and you have two options: `arrange(species, n)` or `arrange(n, species)`. You should try both and decide which one organizes the output by species and then ranks the names in order of frequency for each species.
+
+```{r species-names-top5, eval=TRUE}
+
+```
+
+Use the visualization below to answer questions 5 and 6.
+```{r eval = TRUE, echo = FALSE, fig.fullwidth = TRUE}
+# data prep
+name_props <- seattlepets %>% 
+  filter(
+    !is.na(animal_name),
+    species %in% c("Dog", "Cat")
+    ) %>%
+  group_by(species) %>% 
+  count(animal_name, sort = TRUE) %>%
+  mutate(prop = n / sum(n))
+    
+cat_name_props <- name_props %>%
+  filter(species == "Cat") %>%
+  rename(cat_prop = prop) %>%
+  slice(1:30)
+
+dog_name_props <- name_props %>%
+  filter(species == "Dog") %>%
+  rename(dog_prop = prop) %>%
+  slice(1:30)
+    
+comb_name_props <- inner_join(cat_name_props, dog_name_props, 
+                              by = "animal_name") %>%
+  ungroup() %>%
+  select(animal_name, cat_prop, dog_prop)
+    
+# create viz
+ggplot(comb_name_props, aes(x = cat_prop, y = dog_prop)) +
+  geom_abline(intercept = 0, 
+              color = COL["lgray","full"], 
+              alpha = 0.8, 
+              size = 1.5) +
+  geom_text_repel(aes(label = animal_name), 
+                  segment.color = COL["gray","full"], 
+                  seed = 291252, max.iter = 10000) +
+  geom_point(color = COL["blue","full"], alpha = 0.8) +
+  theme_minimal() +
+  labs(x = "Proportion of cats", y = "Proportion of dogs") +
+  xlim(0.002, 0.01) +
+  ylim(0.002, 0.01) +
+  ggimage::geom_emoji(
+      image = "1f436", aes(x = 0.003, y = 0.009), size = 0.1
+      ) +
+  ggimage::geom_emoji(
+      image = "1f431", aes(x = 0.009, y = 0.003), size = 0.1
+      )
+```
+
+5.  What names are more common for cats than dogs? The ones above the line or the ones below the line?
+
+Answer:
+
+6. Is the relationship between the two variables (proportion of cats with a given name and proportion of dogs with a given name) positive or negative? What does this mean in context of the data?
+
+Answer: 
